@@ -47,7 +47,6 @@ echo.
 for /l %%x in (1,1,%i%) do (
     echo               %%x. !scriptName[%%x]!
 )
-
 echo.
 echo.
 
