@@ -2,11 +2,17 @@
 
 :: Initialization
 mode con cols=60 lines=30
-color 0E
 title DynaPsPscPyPy3-Ba
+color 0E
+set cols=60
 echo.
 echo DynaPsPscPyPy3-Ba Started...
 timeout /t 2 /nobreak >nul
+
+:: Artwork
+set "header60====================( DynaPsPscPyPy3-Ba )===================="
+set "header70==========================( DynaPsPscPyPy3-Ba )========================"
+set "header50===============( DynaPsPscPyPy3-Ba )==============="
 
 :: Function to list scripts
 :generateMenu
@@ -31,13 +37,15 @@ if %i%==0 (
 :menu
 cls
 echo.
-echo ===================( DynaPsPscPyPy3-Ba )====================
+if "%cols%"=="60" echo %header60%
+if "%cols%"=="70" echo %header70%
+if "%cols%"=="50" echo %header50%
 echo.
 echo                      Scripts Found: %i%
 echo.
 
 for /l %%x in (1,1,%i%) do (
-    echo                  %%x. !scriptName[%%x]!
+    echo               %%x. !scriptName[%%x]!
 )
 
 echo.
@@ -64,14 +72,49 @@ set "scriptType=!selectedScript:~0,2!"
 
 :: Determine script type and execute
 echo.
-echo                  Launching !scriptType! Script: !scriptFile!
+echo Launching !scriptType! Script: !scriptFile!
 echo.
 timeout /t 2 /nobreak >nul
 if "!scriptType!"=="PS" (
-    pwsh.exe -NoProfile -ExecutionPolicy Bypass -File "!scriptFile!" || echo                  PowerShell Core not found, falling back to Windows PowerShell...
+    where pwsh >nul 2>&1 && (
+        echo Pwsh Found, Using Pwsh...
+        echo.
+		timeout /t 2 /nobreak >nul
+        pwsh.exe -NoProfile -ExecutionPolicy Bypass -File "!scriptFile!"
+    ) || (
+        where powershell >nul 2>&1 && (
+            echo Pwsh Missing, Using Powershell...
+            echo.
+			timeout /t 2 /nobreak >nul
+            powershell.exe -NoProfile -ExecutionPolicy Bypass -File "!scriptFile!"
+        ) || (
+            echo Powershell Missing, Critical Error!
+            echo.
+			timeout /t 2 /nobreak >nul
+            goto end
+        )
+    )
 ) else if "!scriptType!"=="PY" (
-    python "!scriptFile!" || echo                  Python is not available.
+    where python3 >nul 2>&1 && (
+        echo Python3 Found, Using Python3...
+        echo.
+		timeout /t 2 /nobreak >nul
+        python3 "!scriptFile!"
+    ) || (
+        where python >nul 2>&1 && (
+            echo Python3 Missing, Using Python...
+            echo.
+			timeout /t 2 /nobreak >nul
+            python "!scriptFile!"
+        ) || (
+            echo Python Missing, Critical Error!
+            echo.
+			timeout /t 2 /nobreak >nul
+            goto end
+        )
+    )
 )
+
 
 :: Return to menu or exit
 echo.
@@ -79,7 +122,7 @@ echo ...Script Exited.
 echo.
 timeout /t 2 /nobreak >nul
 :retryExitChoice
-echo                 Select, Main Menu = M, Exit Program = X
+echo Select, Main Menu = M, Exit Program = X
 set /p exitChoice=Option: 
 if /i "%exitChoice%"=="m" goto menu
 if /i "%exitChoice%"=="x" goto end
